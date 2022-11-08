@@ -123,7 +123,7 @@ function update() {
 
             // ブロックが取得できた場合には、そのブロックの上に立っているよう見えるように着地させる
             if (blockTargetIsOn !== null) {
-                updatedEnemyY = blockTargetIsOn.y - 32;
+                updatedEnemyY = blockTargetIsOn.y - 64;
                 updatedEnemyInJump = false;
             }
         } else {
@@ -231,7 +231,7 @@ function update() {
 
             // ブロックが取得できた場合には、そのブロックの上に立っているよう見えるように着地させる
             if (blockTargetIsOn !== null) {
-                updatedY = blockTargetIsOn.y - 32;
+                updatedY = blockTargetIsOn.y - 64;
                 isJump = false;
             } else {
                 // (nullの場合)何もしない（落下させ続ける）
@@ -274,7 +274,7 @@ function update() {
         // 敵情報ごとに当たり判定を行う
         for (const enemy of enemies) {
             // 更新後のプレイヤーの位置情報と、敵の位置情報とが重なっているかをチェックする
-            const isHit = isAreaOverlap(x, y, 32, 32, enemy.x, enemy.y, 32, 32);
+            const isHit = isAreaOverlap(x, y, 64, 64, enemy.x, enemy.y, 32, 32);
 
             if (isHit) {
                 if (isJump && vy > 0) {
@@ -295,7 +295,7 @@ function update() {
     /*--------------------------
       ゴール判定
       -------------------------*/
-    const isGoal = isAreaOverlap(x, y, 32, 32, goalX, goalY, 32, 32);
+    const isGoal = isAreaOverlap(x, y, 64, 64, goalX, goalY, 32, 32);
     if (isGoal) {
         alert("Goal!!");
         isJump = false;
@@ -313,33 +313,33 @@ function update() {
     const image = new Image();
     if (isGameOver) {
         // ゲームオーバーの場合にはゲームオーバーの画像が表示する
-        image.src = "images/glass.png";
+        image.src = "images/chaewon_gameover.png";
     } else if (Math.floor(walkingCount / walkRange) === 0) {
-        image.src = "images/doraemon.png";
+        image.src = "images/chaewon1.png";
     } else if (Math.floor(walkingCount / walkRange) === 1) {
-        image.src = "images/aruku.png";
+        image.src = "images/chaewon2.png";
     } else if (Math.floor(walkingCount / walkRange) === 2) {
-        image.src = "images/aruku.png";
+        image.src = "images/chaewon1.png";
     } else if (Math.floor(walkingCount / walkRange) === 3) {
-        image.src = "images/aruku.png";
+        image.src = "images/chaewon2.png";
     } else if (Math.floor(walkingCount / walkRange) === 4) {
-        image.src = "images/base.png";
+        image.src = "images/chaewon1.png";
     } else if (Math.floor(walkingCount / walkRange) === 5) {
-        image.src = "images/aruku.png";
+        image.src = "images/chaewon2.png";
     } else if (Math.floor(walkingCount / walkRange) === 6) {
-        image.src = "images/base.png";
+        image.src = "images/chaewon1.png";
     } else if (Math.floor(walkingCount / walkRange) === 7) {
-        image.src = "images/aruku.png";
+        image.src = "images/chaewon2.png";
     } else if (Math.floor(walkingCount / walkRange) === 8) {
-        image.src = "images/base.png";
-    } else if (Math.floor(walkingCount / walkRange) === 9) {
-        image.src = "images/aruku.png";
+        image.src = "images/chaewon1.png";
+    } else {
+        image.src = "images/chaewon2.png";
     }
-    ctx.drawImage(image, x, y, 32, 32);
+    ctx.drawImage(image, x, y, 64, 64);
 
     // 地面の画像を表示
     const groundImage = new Image();
-    groundImage.src = "images/glass.png";
+    groundImage.src = "images/block.png";
     //オブジェクトの数だけ繰り返してブロック作成！
     for (const block of blocks) {
         ctx.drawImage(groundImage, block.x, block.y, block.w, block.h);
@@ -347,10 +347,10 @@ function update() {
 
     // 敵の画像を表示
     const enemyImage = new Image();
-    enemyImage.src = "images/base.png"
+    enemyImage.src = "images/monster.png"
     // 敵の描画を敵ごとに行うようにする
     for (const enemy of enemies) {
-        ctx.drawImage(enemyImage, enemy.x, enemy.y, 32, 32);
+        ctx.drawImage(enemyImage, enemy.x, enemy.y, 64, 64);
     }
 
     // ゴールの画像を表示
@@ -373,13 +373,13 @@ function getBlockTargetIsOn(x, y, updatedX, updatedY) {
     for (const block of blocks) {
         // プレイヤーの画像下部が地面の上部より下となったタイミングでブロックの上にいるか否かの判定をする
         //(ジャンプ後（isJump=true時）はy方向は下へ進む（落下している）ので丁度ローディングの前後でブロックと重なり始めたタイミングってこと)
-        if (y + 32 <= block.y && updatedY + 32 >= block.y) {
+        if (y + 64 <= block.y && updatedY + 64 >= block.y) {
             // 下となったタイミングで全てのブロックに対して繰り返し処理をする
             if (
-                //ブロックに重なる直前、ブロックのx座標よりプレイヤーの座標（右端、横幅分+32）が左に位置する、または、右に位置する
-                (x + 32 <= block.x || x >= block.x + block.w) &&
+                //ブロックに重なる直前、ブロックのx座標よりプレイヤーの座標（右端、横幅分+64）が左に位置する、または、右に位置する
+                (x + 64 <= block.x || x >= block.x + block.w) &&
                 //かつ、ブロックに重なった瞬間のプレイヤー座標がブロックの外側に位置する
-                (updatedX + 32 <= block.x || updatedX >= block.x + block.w)
+                (updatedX + 64 <= block.x || updatedX >= block.x + block.w)
             ) {
                 // ブロックの上にいない場合には何もしない
                 continue;
