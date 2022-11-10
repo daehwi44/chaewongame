@@ -34,11 +34,11 @@ const ctx = canvas.getContext("2d");
     初期値設定
     -------------------------*/
 // プレイヤーの初期座標
-let x = 0;
+let x = 450;
 let y = 300;
 
 // ゴールの初期座標
-let goalX = 850;
+let goalX = 430;
 let goalY = 100;
 
 // 上下方向の速度
@@ -56,23 +56,39 @@ const walkRange = 15;
 // ブロック要素の定義（ブロックの位置と大きさはここで調整）
 const blocks = [
     { x: 0, y: 532, w: 100, h: 32 },
-    { x: 100, y: 500, w: 100, h: 32 },
-    { x: 200, y: 450, w: 100, h: 32 },
+    { x: 100, y: 532, w: 50, h: 32 },
+    { x: 250, y: 532, w: 100, h: 32 },
+    { x: 450, y: 532, w: 50, h: 32 },
+    { x: 600, y: 532, w: 100, h: 32 },
+    { x: 750, y: 532, w: 100, h: 32 },
+    { x: 850, y: 532, w: 120, h: 32 },
+    { x: 100, y: 400, w: 30, h: 32 },
     { x: 300, y: 400, w: 100, h: 32 },
-    { x: 400, y: 350, w: 100, h: 32 },
-    { x: 500, y: 300, w: 100, h: 32 },
-    { x: 600, y: 250, w: 100, h: 32 },
-    { x: 700, y: 200, w: 100, h: 32 },
-    { x: 800, y: 120, w: 100, h: 32 },
+    { x: 550, y: 400, w: 50, h: 32 },
+    { x: 800, y: 400, w: 100, h: 32 },
+    { x: 200, y: 300, w: 100, h: 32 },
+    { x: 600, y: 300, w: 100, h: 32 },
+    { x: 250, y: 200, w: 20, h: 32 },
+    { x: 500, y: 200, w: 50, h: 32 },
+    { x: 400, y: 120, w: 100, h: 32 },
 ];
 
-// 敵の情報
+// 敵の情報1
 const enemies = [
-    { x: 650, y: 100, isJump: true, vy: 0 },
-    { x: 720, y: 100, isJump: true, vy: 0 },
-    { x: 740, y: 100, isJump: true, vy: 0 },
+    { x: 250, y: 400, isJump: true, vy: 0 },
+    { x: 520, y: 100, isJump: true, vy: 0 },
+    { x: 640, y: 300, isJump: true, vy: 0 },
     { x: 760, y: 100, isJump: true, vy: 0 },
-    { x: 800, y: 100, isJump: true, vy: 0 },
+    { x: 900, y: 300, isJump: true, vy: 0 },
+];
+
+// 敵の情報2
+const enemies2 = [
+    { x: 250, y: 400, isJump: true, vy: 0 },
+    { x: 520, y: 100, isJump: true, vy: 0 },
+    { x: 640, y: 300, isJump: true, vy: 0 },
+    { x: 760, y: 100, isJump: true, vy: 0 },
+    { x: 900, y: 300, isJump: true, vy: 0 },
 ];
 
 /*--------------------------
@@ -87,11 +103,11 @@ function update() {
     // 画面全体をクリア
     ctx.clearRect(0, 0, 960, 640);
 
-    console.log(x);
+    // console.log(x);
 
 
     /*--------------------------
-        敵側
+        敵側1
     -------------------------*/
 
     // 敵情報ごとに、位置座標を更新する
@@ -150,6 +166,65 @@ function update() {
     }
 
     /*--------------------------
+           敵側2
+       -------------------------*/
+
+    // 敵情報ごとに、位置座標を更新する
+    for (const enemy2 of enemies2) {
+        // アップデート後の敵の座標
+        let updatedEnemyX2 = enemy2.x;
+        let updatedEnemyY2 = enemy2.y;
+        let updatedEnemyInJump2 = enemy2.isJump;
+        let updatedEnemyVy2 = enemy2.vy;
+
+        // 敵は左に固定の速度で移動するようにする
+        updatedEnemyX2 = updatedEnemyX2 + 0.8;//ここで敵のスピード調整
+
+        // 敵の場合にも、主人公の場合と同様にジャンプか否かで分岐
+        if (enemy2.isJump) {
+            // ジャンプ中は敵の速度分だけ追加する
+            updatedEnemyY2 = enemy2.y + enemy2.vy;
+
+            // 速度を固定分だけ増加させる
+            updatedEnemyVy2 = enemy2.vy + 0.5;
+
+            // ブロックを取得する
+            const blockTargetIsOn2 = getBlockTargetIsOn(
+                enemy2.x,
+                enemy2.y,
+                updatedEnemyX2,
+                updatedEnemyY2
+            );
+
+            // ブロックが取得できた場合には、そのブロックの上に立っているよう見えるように着地させる
+            if (blockTargetIsOn2 !== null) {
+                updatedEnemyY2 = blockTargetIsOn2.y - 64;
+                updatedEnemyInJump2 = false;
+            }
+        } else {
+            // ブロックの上にいなければジャンプ中の扱いとして初期速度0で落下するようにする
+            if (
+                getBlockTargetIsOn(enemy2.x, enemy2.y, updatedEnemyX2, updatedEnemyY2) ===
+                null
+            ) {
+                updatedEnemyInJump2 = true;
+                updatedEnemyVy2 = 0;
+            }
+        }
+
+        // 算出した結果に変更する
+        enemy2.x = updatedEnemyX2;
+        enemy2.y = updatedEnemyY2;
+        enemy2.isJump = updatedEnemyInJump2;
+        enemy2.vy = updatedEnemyVy2;
+
+        // 算出した結果に変更する
+        enemyX2 = updatedEnemyX2;
+        enemyY2 = updatedEnemyY2;
+
+    }
+
+    /*--------------------------
         プレイヤー側
     -------------------------*/
     // 更新後のプレイヤーの座標
@@ -172,7 +247,7 @@ function update() {
             // alert("GAME OVER");
             isGameOver = false;
             isJump = false;
-            updatedX = 0;
+            updatedX = 450;
             updatedY = 300;
             vy = 0;
         }
@@ -272,6 +347,7 @@ function update() {
     // なぜなら敵に当たってゲームオーバー状態後も敵に当たれば跳ね続けてしまう（死んでるのにずっとisHitしちゃう）
     if (!isGameOver) {
         // 敵情報ごとに当たり判定を行う
+        // 右から左の敵
         for (const enemy of enemies) {
             // 更新後のプレイヤーの位置情報と、敵の位置情報とが重なっているかをチェックする
             const isHit = isAreaOverlap(x, y, 64, 64, enemy.x, enemy.y, 32, 32);
@@ -290,6 +366,26 @@ function update() {
                 }
             }
         }
+
+        // 左から右の敵
+        for (const enemy2 of enemies2) {
+            // 更新後のプレイヤーの位置情報と、敵の位置情報とが重なっているかをチェックする
+            const isHit2 = isAreaOverlap(x, y, 64, 64, enemy2.x, enemy2.y, 32, 32);
+
+            if (isHit2) {
+                if (isJump && vy > 0) {
+                    // ジャンプしていて、落下している状態で敵にぶつかった場合には
+                    // 敵をブロックの下にはじくとともに、上向きにジャンプさせる
+                    // これもしかしたら下にブロックが二重にあったら敵助かっちゃう？
+                    vy = -7;
+                    enemy2.y = enemy2.y + 200;
+                } else {
+                    // ぶつかっていた場合にはゲームオーバーとし、上方向の初速度を与える
+                    isGameOver = true;
+                    vy = -10;
+                }
+            }
+        }
     }
 
     /*--------------------------
@@ -299,7 +395,7 @@ function update() {
     if (isGoal) {
         alert("Goal!!");
         isJump = false;
-        x = 0;
+        x = 450;
         y = 300;
         vy = 0;
         // これをしてあげないと右キー押したままゴールするとtrueが保持されてリスタート時勝手に右に行く
@@ -345,12 +441,20 @@ function update() {
         ctx.drawImage(groundImage, block.x, block.y, block.w, block.h);
     }
 
-    // 敵の画像を表示
+    // 敵の画像を表示1
     const enemyImage = new Image();
     enemyImage.src = "images/monster.png"
     // 敵の描画を敵ごとに行うようにする
     for (const enemy of enemies) {
         ctx.drawImage(enemyImage, enemy.x, enemy.y, 64, 64);
+    }
+
+    // 敵の画像を表示2
+    const enemyImage2 = new Image();
+    enemyImage2.src = "images/monster.png"
+    // 敵の描画を敵ごとに行うようにする
+    for (const enemy2 of enemies2) {
+        ctx.drawImage(enemyImage2, enemy2.x, enemy2.y, 64, 64);
     }
 
     // ゴールの画像を表示
